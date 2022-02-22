@@ -78,8 +78,3 @@ def get_cell_value(file_index: int, sheet_name: str, axis: str) -> str:
     buf = create_string_buffer(buf_size)
     lib.GetCellValue.restype = c_char_p
     return lib.GetCellValue(file_index, sheet_name.encode(ENCODE), axis.encode(ENCODE), buf, buf_size).decode(ENCODE)
-
-
-if __name__ == '__main__':
-    p = lib.NewFile()
-    lib.SaveAs(p, b'./hello.xlsx')
