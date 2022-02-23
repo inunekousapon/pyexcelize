@@ -1,18 +1,56 @@
 package main
 
-//#include <stdlib.h>
+/*#include <stdlib.h>
+#include <time.h>
+struct ExcelValue {
+	int int_value;
+	float float_value;
+	char* string_value;
+	int value_type;
+};
+*/
 import "C"
 
 import (
 	"bytes"
+	"time"
 	"unsafe"
 
 	"github.com/xuri/excelize/v2"
 )
 
+const ValueType_Int C.int  = 0
+const ValueType_Float C.int  = 1
+const ValueType_String C.int  = 2
+const ValueType_Bool C.int  = 3
+const ValueType_Time C.int  = 4
+const ValueType_Nil C.int  = 5
 
 var files map[int]*excelize.File
+var writers map[int]*excelize.StreamWriter
 var fIndex = 0
+var wIndex = 0
+
+
+func convert_excelvalue(val *C.struct_ExcelValue) interface{} {
+	switch val.value_type {
+	case ValueType_Int:
+		return val.int_value
+	case ValueType_Float:
+		return val.float_value
+	case ValueType_String:
+		return C.GoString(val.string_value)
+	case ValueType_Bool:
+		return val.int_value == 1
+	case ValueType_Time:
+		return time.Unix(int64(val.int_value), 0)
+	case ValueType_Nil:
+		return nil
+	default:
+		return nil
+	}
+}
+
 
 /////////////////////////////////////////////////////////
 //                      WorkBook
@@ -257,6 +295,42 @@ func GetCellStyle(fIndex int, sheetname *C.char, axis *C.char) int {
 /////////////////////////////////////////////////////////
 //                     StreamWriter
 /////////////////////////////////////////////////////////
+//export NewStreamWriter
+func NewStreamWriter(fIndex int, sheetname *C.char) int {
+	writer, err := files[fIndex].NewStreamWriter(C.GoString(sheetname))
+	if err != nil {
+		return -1
+	}
+	wIndex ++
+	if writers == nil {
+		writers = make(map[int]*excelize.StreamWriter)
+	}
+	writers[wIndex] = writer
+	return wIndex
+}
+
+//export SetRow
+func SetRow(wIndex int, axis *C.char, rowPtr *C.struct_ExcelValue, length int) int {
+	values := make([]interface{}, length)
+	row := unsafe.Slice(rowPtr, length)
+	for i, x := range row {
+		values[i] = convert_excelvalue(&x)
+	}
+	err := writers[wIndex].SetRow(C.GoString(axis), values)
+	if err != nil {
+		return -1;
+	}
+	return length
+}
+
+//AddTable
+//MergeCell
+//SetColWidth
+//export Flush
+func Flush(wIndex int) {
+	writers[wIndex].Flush()
+	delete(writers, wIndex)
+}
 
 
 /////////////////////////////////////////////////////////

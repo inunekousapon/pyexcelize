@@ -21,6 +21,13 @@ typedef struct { const char *p; ptrdiff_t n; } _GoString_;
 
 #line 3 "main.go"
 #include <stdlib.h>
+#include <time.h>
+struct ExcelValue {
+	int int_value;
+	float float_value;
+	char* string_value;
+	int value_type;
+};
 
 #line 1 "cgo-generated-wrapper"
 
@@ -91,6 +98,17 @@ extern void SetCellStyle(GoInt fIndex, char* sheetname, char* hCell, char* vCell
 //GetCellRichText
 extern GoUint8* GetCellValue(GoInt fIndex, char* sheetname, char* axis, GoUint8* out, GoInt64 outN);
 extern GoInt GetCellStyle(GoInt fIndex, char* sheetname, char* axis);
+
+/////////////////////////////////////////////////////////
+//                     StreamWriter
+/////////////////////////////////////////////////////////
+extern GoInt NewStreamWriter(GoInt fIndex, char* sheetname);
+extern GoInt SetRow(GoInt wIndex, char* axis, struct ExcelValue* rowPtr, GoInt length);
+
+//AddTable
+//MergeCell
+//SetColWidth
+extern void Flush(GoInt wIndex);
 
 #ifdef __cplusplus
 }
