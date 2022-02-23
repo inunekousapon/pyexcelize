@@ -1,4 +1,5 @@
-from ctypes import CDLL, c_int, c_char_p, create_string_buffer
+from datetime import datetime
+from ctypes import CDLL, c_int, c_char_p, create_string_buffer, Structure, c_float, sizeof
 
 
 lib = CDLL('py-excelize.so')
@@ -11,6 +12,21 @@ __version__ = '0.1.0'
 class PyExcelizeError(Exception):
     pass
 
+
+class ExcelValue(Structure):
+    _fields_ = [
+        ('int_value', c_int),
+        ('float_value', c_float),
+        ('str_value', c_char_p),
+        ('value_type', c_int),
+    ]
+
+ValueType_Int = 0
+ValueType_Float = 1
+ValueType_String = 2
+ValueType_Bool = 3
+ValueType_Time = 4
+ValueType_Nil = 5
 
 def new_file() -> int:
     return lib.NewFile()
@@ -78,3 +94,37 @@ def get_cell_value(file_index: int, sheet_name: str, axis: str) -> str:
     buf = create_string_buffer(buf_size)
     lib.GetCellValue.restype = c_char_p
     return lib.GetCellValue(file_index, sheet_name.encode(ENCODE), axis.encode(ENCODE), buf, buf_size).decode(ENCODE)
+
+
+def new_stream_writer(file_index: int, sheet_name: str) -> int:
+    return lib.NewStreamWriter(file_index, sheet_name.encode(ENCODE))
+
+
+def set_row(writer_index: int, axis: str, row: list) -> None:
+    ExcelValues = ExcelValue * len(row)
+    param = ExcelValues()
+    for v, p in zip(row, param):
+        if isinstance(v, int):
+            p.int_value = v
+            p.value_type = ValueType_Int
+        elif isinstance(v, str):
+            p.str_value = v.encode(ENCODE)
+            p.value_type = ValueType_String
+        elif isinstance(v, float):
+            p.float_value = v
+            p.value_type = ValueType_Float
+        elif isinstance(v, bool):
+            p.int_value = 1 if v else 0
+            p.value_type = ValueType_Bool
+        elif isinstance(v, datetime):
+            p.str_value = v.isoformat()
+            p.value_type = ValueType_Time
+        elif v is None:
+            p.value_type = ValueType_Nil
+        else:
+            raise PyExcelizeError('unsupported type')
+    lib.SetRow(writer_index, axis.encode(ENCODE), param, len(row))
+
+
+def flush(writer_index: int) -> None:
+    lib.Flush(writer_index)
