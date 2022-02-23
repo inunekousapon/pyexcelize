@@ -1,4 +1,4 @@
-module py-excelize
+module pyexcelize
 
 go 1.17
 
