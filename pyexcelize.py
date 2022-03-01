@@ -10,10 +10,6 @@ from distutils.sysconfig import get_config_var
 here = Path(__file__).absolute().parent
 ext_suffix = get_config_var("EXT_SUFFIX")
 so_file = f'{here}/excelize{ext_suffix}'
-
-print(so_file)
-print(os.path.exists(so_file))
-
 lib = CDLL(so_file)
 ENCODE = 'utf-8'
 
