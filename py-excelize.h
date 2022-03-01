@@ -105,8 +105,8 @@ extern GoInt GetCellStyle(GoInt fIndex, char* sheetname, char* axis);
 /////////////////////////////////////////////////////////
 extern GoInt NewStreamWriter(GoInt fIndex, char* sheetname);
 extern GoInt SetRow(GoInt wIndex, char* axis, struct ExcelValue* rowPtr, GoInt length);
+extern void AddTable(GoInt wIndex, char* hCell, char* vCell, char* format);
 
-//AddTable
 //MergeCell
 //SetColWidth
 extern void Flush(GoInt wIndex);

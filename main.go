@@ -199,7 +199,7 @@ func SetSheetRow(fIndex int, sheetname *C.char, axis *C.char, rowPtr *C.struct_E
 	for i, x := range row {
 		values[i] = convert_excelvalue(&x)
 	}
-	files[fIndex].SetSheetRow(C.GoString(sheetname), C.GoString(axis), values)
+	files[fIndex].SetSheetRow(C.GoString(sheetname), C.GoString(axis), &values)
 }
 
 //InsertPageBreak
@@ -333,7 +333,11 @@ func SetRow(wIndex int, axis *C.char, rowPtr *C.struct_ExcelValue, length int) i
 	return length
 }
 
-//AddTable
+//export AddTable
+func AddTable(wIndex int, hCell *C.char, vCell *C.char, format *C.char) {
+	writers[wIndex].AddTable(C.GoString(hCell), C.GoString(vCell), C.GoString(format))
+}
+
 //MergeCell
 //SetColWidth
 //export Flush

@@ -1,3 +1,4 @@
+import json
 from datetime import datetime, date
 from ctypes import CDLL, c_int, c_char_p, create_string_buffer, Structure, c_float, sizeof
 
@@ -137,6 +138,10 @@ def set_row(writer_index: int, axis: str, row: list) -> None:
     for v, p in zip(row, param):
         _param_to_excel_value(v, p)
     lib.SetRow(writer_index, axis.encode(ENCODE), param, len(row))
+
+
+def add_table(writer_index: int, h, v, format:dict):
+    lib.AddTable(writer_index, h.encode(ENCODE), v.encode(ENCODE), json.dumps(format).encode(ENCODE))
 
 
 def flush(writer_index: int) -> None:
