@@ -4,13 +4,15 @@ pyexcelize
 ## Introduction
 
 Creating formatting in Python when outputting to Excel can be tedious. Usually, you will want to write the formatting in Excel and then just output the data.
-
 It is a good idea to use OpenPyXL when working with Excel in Python. However, OpenPyXL uses a very large amount of memory.
-
 OpenPyXL is not suitable for writing data to a loaded Excel. However, there is a library in the Go language called excelize that is suitable for writing data.
-
 pyexcelize wraps Go's excelize and makes it usable.
 
+## Installation
+
+```
+pip install pyexcelize
+```
 
 ## Basic Usage
 

@@ -1,5 +1,2 @@
-certifi==2021.10.8
 Faker==13.3.0
-python-dateutil==2.8.2
 setuptools-golang==2.7.0
-six==1.16.0

@@ -7,3 +7,6 @@ __pycache__
 
 # python egg
 pyexcelize.egg-info/*
+
+# setuptools
+dist/*
