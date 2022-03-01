@@ -3,19 +3,14 @@ pyexcelize
 
 ## Introduction
 
-If you want to handle Excel with formatting in Python, you can use OpenPyXL.
-However, OpenPyXL is very slow and uses a lot of memory, making it useless in some cases.
+Creating formatting in Python when outputting to Excel can be tedious. Usually, you will want to write the formatting in Excel and then just output the data.
 
-OpenPyXL has a lot of features, and no alternative library was found in Python.
-On the other hand, Go had a highly functional library called Excelize.
+It is a good idea to use OpenPyXL when working with Excel in Python. However, OpenPyXL uses a very large amount of memory.
 
-This package indirectly calls Excelize in Go from Python.
+OpenPyXL is not suitable for writing data to a loaded Excel. However, there is a library in the Go language called excelize that is suitable for writing data.
 
-<img src="https://user-images.githubusercontent.com/6970513/155269441-0d93b900-cd4d-43c4-be76-0a744786c2c2.png" width=480 alt="Writer Benchmark of Generation 50000 * 20(Time costs)">
+pyexcelize wraps Go's excelize and makes it usable.
 
-<img src="https://user-images.githubusercontent.com/6970513/155269464-df7b8e6d-4463-4a08-92e2-e8492fd0db04.png" width=480 alt="Writer Benchmark of Generation 50000 * 20(Memory Usage)">
-
-Note: I am using StreamWriter for writing.
 
 ## Basic Usage
 
@@ -69,104 +64,38 @@ pe.save(index)
 pe.close(index)
 ```
 
-## Benchmark
-
-Environment
-
-- MacBook Pro (13-inch, 2019)
-- CPU 1.4 GHz Quad core Intel Core i5
-- Memory 16 GB 2133 MHz LPDDR3
-
-### OpenpyXL Code
+Stream Writer with Template xlsx.  
+If you don't use Stream Writer, it will use more than 2GB of memory.  
+Stream Writer will only consume less than 100MB of memory.
 
 ```python
-import resource
-from os.path import getsize
-from datetime import datetime
-
-from openpyxl import Workbook
-
-
-def get_maxrss() -> float:
-    r = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
-    return r // 1024 // 1024  # bytes on MacOS
-
-
-print(f"{datetime.now().isoformat()} init: {get_maxrss()}MB")
-wb = Workbook()
-ws = wb.worksheets[0]
-txt = "1234567890" * 10
-
-for row in range(1,50000):
-    for col in range(1, 20):
-        ws.cell(row=row, column=col, value=txt)
-
-print(f"{datetime.now().isoformat()} writed: {get_maxrss()}MB")
-wb.save('./output.xlsx')
-print(f"{datetime.now().isoformat()} saved: {get_maxrss()}MB")
-wb.close()
-print(f"{datetime.now().isoformat()} closed: {get_maxrss()}MB")
+index = pe.open_file('./tests/template.xlsx')
+writer_index = pe.new_stream_writer(index, "Sheet1")
+headers = [
+    "employee name",
+    "company",
+    "salary",
+]
+pe.set_row(writer_index, "A1", headers)
+for row in range(2,500000):
+    params = [
+        fake.name(),
+        random.choice(["Google", "Microsoft", "Apple", "Toyota", "Meta"]),
+        random.randint(10000, 10000000),
+    ]
+    pe.set_row(writer_index, f"A{row}", params)
+pe.add_table(writer_index, "A1", "C499999", dict(
+    table_name="テーブル1",
+    table_style="TableStyleMedium2",
+    show_first_column=True,
+    show_last_column=True,
+    show_row_stripes=True,
+    show_column_stripes=False,
+))
+pe.flush(writer_index)
+pe.save_as(index, './__tmp/output.xlsx')
+pe.close(index)
 ```
-
-
-### Go Only
-
-```go
-package main
-
-import (
-	"fmt"
-	"syscall"
-	"time"
-
-	"github.com/xuri/excelize/v2"
-)
-
-func GetStackMemory() int64 {
-    var rusageInfo syscall.Rusage
-    syscall.Getrusage(syscall.RUSAGE_SELF, &rusageInfo)
-    return rusageInfo.Maxrss
-}
-
-func main() {
-
-    now := time.Now()
-    fmt.Printf("%s init: %dMB\n", now.Format(time.RFC3339), GetStackMemory()/1024/1024)
-
-    f := excelize.NewFile()
-
-    txt := "1234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890"
-    writer, err := f.NewStreamWriter("Sheet1")
-    if err != nil {
-        fmt.Println(err)
-        syscall.Exit(0)
-    }
-
-    for i := 1; i < 100000; i++ {
-        row := make([]interface{}, 20)
-        for colID := 0; colID < 20; colID++ {
-            row[colID] = txt
-        }
-        cell, _ := excelize.CoordinatesToCellName(1, i)
-        writer.SetRow(cell, row)
-    }
-    writer.Flush()
-
-    now = time.Now()
-    fmt.Printf("%s writed: %dMB\n", now.Format(time.RFC3339), GetStackMemory()/1024/1024)
-
-    f.SaveAs("output.xlsx")
-
-    now = time.Now()
-    fmt.Printf("%s saved: %dMB\n", now.Format(time.RFC3339), GetStackMemory()/1024/1024)
-
-    f.Close()
-
-    now = time.Now()
-    fmt.Printf("%s closed: %dMB\n", now.Format(time.RFC3339), GetStackMemory()/1024/1024)
-}
-```
-
 
 ## Memo
 
