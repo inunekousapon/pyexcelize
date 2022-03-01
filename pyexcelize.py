@@ -48,7 +48,6 @@ def _param_to_excel_value(value, param):
     elif value is None:
         param.value_type = ValueType_Nil
     else:
-        import pdb;pdb.set_trace()
         raise PyExcelizeError('unsupported type')
 
 
