@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from ctypes import CDLL, c_int, c_char_p, create_string_buffer, Structure, c_float, sizeof
 
 
@@ -116,8 +116,8 @@ def set_row(writer_index: int, axis: str, row: list) -> None:
         elif isinstance(v, bool):
             p.int_value = 1 if v else 0
             p.value_type = ValueType_Bool
-        elif isinstance(v, datetime):
-            p.str_value = v.isoformat()
+        elif isinstance(v, (datetime, date)):
+            p.str_value = v.isoformat().encode(ENCODE)
             p.value_type = ValueType_Time
         elif v is None:
             p.value_type = ValueType_Nil
