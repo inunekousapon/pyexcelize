@@ -191,7 +191,17 @@ func GetActiveSheetIndex(fIndex int) int {
 //UnprotectSheet
 //RemoveCol
 //RemoveRow
-//SetSheetRow
+
+//export SetSheetRow
+func SetSheetRow(fIndex int, sheetname *C.char, axis *C.char, rowPtr *C.struct_ExcelValue, length int) {
+	values := make([]interface{}, length)
+	row := unsafe.Slice(rowPtr, length)
+	for i, x := range row {
+		values[i] = convert_excelvalue(&x)
+	}
+	files[fIndex].SetSheetRow(C.GoString(sheetname), C.GoString(axis), values)
+}
+
 //InsertPageBreak
 //RemovePageBreak
 
