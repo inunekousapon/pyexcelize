@@ -1,9 +1,20 @@
 import json
 from datetime import datetime, date
 from ctypes import CDLL, c_int, c_char_p, create_string_buffer, Structure, c_float, sizeof
+from pathlib import Path
+import os
+
+from distutils.sysconfig import get_config_var
 
 
-lib = CDLL('py-excelize.so')
+here = Path(__file__).absolute().parent
+ext_suffix = get_config_var("EXT_SUFFIX")
+so_file = f'{here}/excelize{ext_suffix}'
+
+print(so_file)
+print(os.path.exists(so_file))
+
+lib = CDLL(so_file)
 ENCODE = 'utf-8'
 
 

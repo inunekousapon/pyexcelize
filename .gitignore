@@ -1,5 +1,9 @@
 # go binary
-py-excelize.so
+*.so
+build/*
 
 # python cache
 __pycache__
+
+# python egg
+pyexcelize.egg-info/*
