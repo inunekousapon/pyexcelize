@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from ctypes import CDLL, c_int, c_char_p, create_string_buffer, Structure, c_float, sizeof
 
 
@@ -27,6 +27,30 @@ ValueType_String = 2
 ValueType_Bool = 3
 ValueType_Time = 4
 ValueType_Nil = 5
+
+
+def _param_to_excel_value(value, param):
+    if isinstance(value, int):
+        param.int_value = value
+        param.value_type = ValueType_Int
+    elif isinstance(value, str):
+        param.str_value = value.encode(ENCODE)
+        param.value_type = ValueType_String
+    elif isinstance(value, float):
+        param.float_value = value
+        param.value_type = ValueType_Float
+    elif isinstance(value, bool):
+        param.int_value = 1 if value else 0
+        param.value_type = ValueType_Bool
+    elif isinstance(value, (datetime, date)):
+        param.str_value = value.isoformat().encode(ENCODE)
+        param.value_type = ValueType_Time
+    elif value is None:
+        param.value_type = ValueType_Nil
+    else:
+        import pdb;pdb.set_trace()
+        raise PyExcelizeError('unsupported type')
+
 
 def new_file() -> int:
     return lib.NewFile()
@@ -72,6 +96,14 @@ def get_active_sheet_index(file_index: int) -> int:
     return lib.GetActiveSheetIndex(file_index)
 
 
+def set_sheet_row(file_index:int, sheet_name: str, axis: str, values):
+    ExcelValues = ExcelValue * len(values)
+    param = ExcelValues()
+    for v, p in zip(values, param):
+        _param_to_excel_value(v, p)
+    lib.SetSheetRow(file_index, sheet_name.encode(ENCODE), axis.encode(ENCODE), param, len(values))
+
+
 def set_cell_int(file_index:int, sheet_name: str, axis: str, value: int) -> None:
     lib.SetCellInt(file_index, sheet_name.encode(ENCODE), axis.encode(ENCODE), value)
 
@@ -104,25 +136,7 @@ def set_row(writer_index: int, axis: str, row: list) -> None:
     ExcelValues = ExcelValue * len(row)
     param = ExcelValues()
     for v, p in zip(row, param):
-        if isinstance(v, int):
-            p.int_value = v
-            p.value_type = ValueType_Int
-        elif isinstance(v, str):
-            p.str_value = v.encode(ENCODE)
-            p.value_type = ValueType_String
-        elif isinstance(v, float):
-            p.float_value = v
-            p.value_type = ValueType_Float
-        elif isinstance(v, bool):
-            p.int_value = 1 if v else 0
-            p.value_type = ValueType_Bool
-        elif isinstance(v, datetime):
-            p.str_value = v.isoformat()
-            p.value_type = ValueType_Time
-        elif v is None:
-            p.value_type = ValueType_Nil
-        else:
-            raise PyExcelizeError('unsupported type')
+        _param_to_excel_value(v, p)
     lib.SetRow(writer_index, axis.encode(ENCODE), param, len(row))
 
 

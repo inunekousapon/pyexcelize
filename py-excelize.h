@@ -89,6 +89,7 @@ extern void DeleteSheet(GoInt fIndex, char* sheetname);
 extern GoInt CopySheet(GoInt fIndex, GoInt fromSheet, GoInt toSheet);
 extern void SetActiveSheet(GoInt fIndex, GoInt sheetIndex);
 extern GoInt GetActiveSheetIndex(GoInt fIndex);
+extern void SetSheetRow(GoInt fIndex, char* sheetname, char* axis, struct ExcelValue* rowPtr, GoInt length);
 extern void SetCellInt(GoInt fIndex, char* sheetname, char* axis, GoInt value);
 extern void SetCellStr(GoInt fIndex, char* sheetname, char* axis, char* value);
 extern void SetCellStyle(GoInt fIndex, char* sheetname, char* hCell, char* vCell, GoInt styleIndex);
