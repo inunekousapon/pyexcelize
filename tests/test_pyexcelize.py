@@ -4,8 +4,17 @@ import shutil
 import resource
 from os.path import getsize
 from datetime import datetime
+import random
+
+from faker.factory import Factory
 
 import pyexcelize as pe
+
+
+Faker = Factory.create
+fake = Faker()
+fake.seed(0)
+fake = Faker("ja_JP")
 
 
 def get_maxrss() -> float:
@@ -57,6 +66,12 @@ class ASeriesOfTest(unittest.TestCase):
 
 class PerformanceTest(unittest.TestCase):
 
+    def setUp(self):
+        try:
+            os.mkdir('__tmp')
+        except FileExistsError as e:
+            pass
+
     def test_performance(self):
         print(f"{datetime.now().isoformat()} init: {get_maxrss()}MB")
         index = pe.new_file()
@@ -74,7 +89,7 @@ class PerformanceTest(unittest.TestCase):
 
         print(f"{datetime.now().isoformat()} writed: {get_maxrss()}MB")
 
-        pe.save_as(index, 'output.xlsx')
+        pe.save_as(index, './__tmp/output.xlsx')
 
         print(f"{datetime.now().isoformat()} saved: {get_maxrss()}MB")
 
@@ -82,6 +97,42 @@ class PerformanceTest(unittest.TestCase):
 
         print(f"{datetime.now().isoformat()} closed: {get_maxrss()}MB")
 
+    def test_template_performance(self):
+
+        print(f"{datetime.now().isoformat()} init: {get_maxrss()}MB")
+
+        index = pe.open_file('./tests/template.xlsx')
+        writer_index = pe.new_stream_writer(index, "Sheet1")
+        headers = [
+            "employee name",
+            "company",
+            "salary",
+        ]
+        pe.set_row(writer_index, "A1", headers)
+        for row in range(2,500000):
+            params = [
+                fake.name(),
+                random.choice(["Google", "Microsoft", "Apple", "Toyota", "Meta"]),
+                random.randint(10000, 10000000),
+            ]
+            pe.set_row(writer_index, f"A{row}", params)
+        pe.add_table(writer_index, "A1", "C499999", dict(
+            table_name="テーブル1",
+            table_style="TableStyleMedium2",
+            show_first_column=True,
+            show_last_column=True,
+            show_row_stripes=True,
+            show_column_stripes=False,
+        ))
+        pe.flush(writer_index)
+        print(f"{datetime.now().isoformat()} writed: {get_maxrss()}MB")
+        pe.save_as(index, './__tmp/output.xlsx')
+        print(f"{datetime.now().isoformat()} saved: {get_maxrss()}MB")
+        pe.close(index)
+        print(f"{datetime.now().isoformat()} closed: {get_maxrss()}MB")
+
+    def tearDown(self):
+        shutil.rmtree('__tmp')
 
 if __name__ == '__main__':
     unittest.main()
