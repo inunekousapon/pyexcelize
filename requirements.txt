@@ -1,5 +1,5 @@
 certifi==2021.10.8
-Faker @ file:///Users/yukawa/Library/Caches/pypoetry/artifacts/fd/18/70/3eaa79f56e9f355bf6f0190a36d6fa35da8d9c13cff9b5ae5577e4c07a/Faker-13.3.0-py3-none-any.whl
-python-dateutil @ file:///Users/yukawa/Library/Caches/pypoetry/artifacts/53/f8/2a/7d63ce15df7386e9536e83413453f8aa845b47fb425f05c4ca2fb231c3/python_dateutil-2.8.2-py2.py3-none-any.whl
-setuptools-golang @ file:///Users/yukawa/Library/Caches/pypoetry/artifacts/df/46/f2/de3214c34d89b88cdefbacb2cd012806014d667d4eb96975c3a9ce83eb/setuptools_golang-2.7.0-py2.py3-none-any.whl
-six @ file:///Users/yukawa/Library/Caches/pypoetry/artifacts/08/9f/47/c16ae03035fc69eaf100ea39657a49baaeef714e25a52575710c34cd48/six-1.16.0-py2.py3-none-any.whl
+Faker==13.3.0
+python-dateutil==2.8.2
+setuptools-golang==2.7.0
+six==1.16.0
