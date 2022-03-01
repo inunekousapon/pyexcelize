@@ -1,0 +1,5 @@
+# go binary
+py-excelize.so
+
+# python cache
+__pycache__
