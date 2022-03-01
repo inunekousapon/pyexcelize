@@ -98,15 +98,3 @@ pe.flush(writer_index)
 pe.save_as(index, './__tmp/output.xlsx')
 pe.close(index)
 ```
-
-## Memo
-
-Go Build Command
-```
-go build -buildmode=c-shared -o py-excelize.so main.go
-```
-
-Test
-```
-python -m unittest
-```
