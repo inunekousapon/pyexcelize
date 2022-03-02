@@ -15,7 +15,7 @@ def _requires_from_file(filename):
 
 setup(
     name="pyexcelize",
-    version="0.2.1",
+    version="0.2.2",
     license="MIT",
     description="A Python library for reading and writing Excel files",
     long_description=open("README.md").read(),
@@ -23,7 +23,7 @@ setup(
     author="Junichi Yukawa",
     author_email="j.yukawa@gmail.com",
     ext_modules=[Extension('excelize', ['main.go'])],
-    build_golang={'root': 'github.com/asottile/fake', 'strip': False},
+    build_golang={'root': 'github.com/inunekousapon/pyexcelize', 'strip': False},
     setup_requires=['setuptools-golang'],
     packages=find_packages('./'),
     install_requires=_requires_from_file('requirements.txt'),
